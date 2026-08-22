@@ -1,0 +1,13 @@
+name: _
+
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+workspace:
+  - app
+  - ui/scribe_app
+  - ui/scribe_ui
+  - services
+  - groundsdk
