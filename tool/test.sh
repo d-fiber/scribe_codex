@@ -56,7 +56,17 @@ say "analysing"
 flutter analyze
 
 say "running the suites"
-flutter test
+suites=0
+for package in app ui/scribe_ui ui/scribe_app services groundsdk; do
+  [ -d "$package/test" ] || continue
+  suites=$((suites + 1))
+  say "  $package"
+  (cd "$package" && flutter test)
+done
+
+if [ "$suites" -eq 0 ]; then
+  say "no package holds a test directory, so nothing was run. This gate is green on a build alone."
+fi
 
 say "building the site the framework will serve"
 cd app
