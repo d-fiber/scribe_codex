@@ -1,0 +1,96 @@
+name: sync
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
+env:
+
+jobs:
+  alchemy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check that the key this needs is here
+        env:
+          KEY: ${{ secrets.SCRIBE_PUSH_KEY }}
+        run: |
+          set -eu
+          [ -n "$KEY" ] && exit 0
+
+          echo "SCRIBE_PUSH_KEY is not set on this repository, and nothing can be copied without it." >&2
+          echo "" >&2
+          echo "It is the private half of a deploy key with write access on d-fiber/scribe." >&2
+          echo "Without it the push to dev is refused like anybody else's." >&2
+          echo "" >&2
+          echo "Nothing was copied." >&2
+          exit 1
+
+      - uses: actions/checkout@v4
+        with:
+          path: source
+
+      - uses: actions/checkout@v4
+        with:
+          repository: d-fiber/scribe
+          ref: dev
+          path: scribe
+          ssh-key: ${{ secrets.SCRIBE_PUSH_KEY }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Build the site
+        working-directory: source
+        run: |
+          set -eu
+          flutter pub get
+          cd app
+          flutter build web --release --output "$GITHUB_WORKSPACE/source/build/web"
+
+      - name: Copy what belongs in the framework
+        run: bash source/.github/sync/copy.sh "$GITHUB_WORKSPACE/scribe/web/dashboard"
+
+      - name: Leave if the framework already holds this
+        id: state
+        working-directory: scribe
+        run: |
+          set -eu
+          if git diff --quiet -- web/dashboard; then
+            echo "the framework already holds this build of the dashboard"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git status --short -- web/dashboard
+          fi
+
+      - name: Check that what landed is a site somebody can serve
+        if: steps.state.outputs.changed == 'true'
+        working-directory: scribe
+        run: |
+          set -eu
+          [ -f web/dashboard/index.html ] || { echo "web/dashboard holds no index.html" >&2; exit 1; }
+          [ -f web/dashboard/main.dart.js ] || { echo "web/dashboard holds no compiled entry" >&2; exit 1; }
+          echo "web/dashboard holds $(find web/dashboard -type f | wc -l | tr -d ' ') files, index and entry included"
+
+      - name: Put it on dev
+        if: steps.state.outputs.changed == 'true'
+        working-directory: scribe
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/dashboard
+          git commit -m "[CHORE]: bring the dashboard up to ${GITHUB_SHA:0:7}"
+          git pull --rebase origin dev
+          git push origin HEAD:dev
