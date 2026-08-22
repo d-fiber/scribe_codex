@@ -12,8 +12,6 @@ concurrency:
   group: sync
   cancel-in-progress: false
 
-env:
-
 jobs:
   alchemy:
     runs-on: ubuntu-latest
