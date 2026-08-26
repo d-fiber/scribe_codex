@@ -50,7 +50,7 @@ fail() {
   exit 1
 }
 
-[ -n "$TARGET" ] || fail "Name the directory to copy into, as in .../scribe/web/dashboard"
+[ -n "$TARGET" ] || fail "Name the directory to copy into, as in .../scribe/web/codex"
 [ -d "$(dirname "$TARGET")" ] || fail "$(dirname "$TARGET") does not exist, so $TARGET is not where you think"
 [ -d "$SOURCE/build/web" ] || fail "$SOURCE/build/web does not exist. Run tool/test.sh first, which builds it."
 [ -f "$SOURCE/build/web/index.html" ] || fail "$SOURCE/build/web holds no index.html, so it is not a built site."
