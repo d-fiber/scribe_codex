@@ -12,7 +12,7 @@ updates:
     open-pull-requests-limit: 5
 
   - package-ecosystem: pub
-    directory: /app
+    directory: /
     target-branch: dev
     schedule:
       interval: weekly
