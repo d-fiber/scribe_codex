@@ -1,5 +1,23 @@
 # Contributing
 
+## Contributor License Agreement
+
+Every pull request needs a signed CLA before it can be merged. It is one agreement for the whole
+framework and one signature per contributor: signing once covers the five repositories, and there
+is nothing to sign again here.
+
+The reason is narrow and worth stating plainly: the licence lets you change your own copy, but it
+does not give Fiber any right to your changes. Without a CLA, a patch cannot legally be merged
+however good it is.
+
+The agreement and the way to sign it are in
+[the framework's `.github/cla/CLA.md`](https://github.com/d-fiber/scribe/blob/dev/.github/cla/CLA.md).
+CI checks every commit author of a pull request against the register that repository holds, so a
+signature added there takes effect here the moment it lands.
+
+If you cannot sign it, open an issue describing the change instead. A clear description of the
+problem is often more useful than the patch anyway.
+
 ## What belongs where
 
 Four questions decide which package a file goes in, and a file has to answer one of them clearly.
