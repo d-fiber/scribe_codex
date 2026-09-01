@@ -110,10 +110,3 @@ jobs:
           else
             gh release create "v$ASKED" --title "$ASKED" --notes-file /tmp/notes.md --verify-tag
           fi
-
-  publish:
-    needs: promote
-    uses: ./.github/workflows/publish.yml
-    with:
-      version: ${{ inputs.version }}
-    secrets: inherit
