@@ -79,7 +79,7 @@ jobs:
         working-directory: scribe
         run: |
           set -eu
-          if git diff --quiet -- web/codex; then
+          if [ -z "$(git status --porcelain -- web/codex)" ]; then
             echo "the framework already holds this build"
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
